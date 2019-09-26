@@ -1,0 +1,26 @@
+{
+	"name" : "swango/cache",
+	"license" : "Apache-2.0",
+	"keywords" : [
+		"php",
+		"swoole",
+		"cache",
+                "redis"
+	],
+	"require" : {
+		"php": ">=7.1",
+		"swango/stdlib": "^1.2"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"Swango\\Cache\\" : "src"
+		},
+		"classmap" : [
+			"src/cache.php"
+		]
+	},
+	"config" : {
+		"optimize-autoloader" : true,
+		"sort-packages" : true
+	}
+}
