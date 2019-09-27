@@ -9,7 +9,8 @@
 	],
 	"require" : {
 		"php": ">=7.1",
-		"swango/stdlib": "^1.2"
+		"swango/stdlib": "^1.2",
+		"swlib/archer": "^1.1"
 	},
 	"autoload" : {
 		"psr-4" : {
