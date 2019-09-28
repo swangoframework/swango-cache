@@ -3,14 +3,13 @@ namespace Swango\Cache;
 /**
  *
  * @author fdrea
- *
  */
 final class RedisPool {
     private static $config, $queue;
     public static function initInWorker() {
         self::$config = include CONFIGSHAREDIR . 'redis.php';
         self::$queue = new \SplQueue();
-        \swoole_timer_after(rand(50, 5000), '\\swoole_timer_tick', 10000, '\\Coroutine\\RedisPool::checkConnection');
+        \swoole_timer_after(rand(50, 5000), '\\swoole_timer_tick', 10000, '\\Swango\\Cache\\RedisPool::checkConnection');
     }
     private static function newConnection(): \Swoole\Coroutine\Redis {
         $connection = new \Swoole\Coroutine\Redis();
