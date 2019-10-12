@@ -8,11 +8,11 @@ class InternelCmd {
      */
     private static $redis;
     protected static function sendBroadcast(string $class_name, string $cmd_data): int {
-        if (defined('WORKING_MODE') && defined('WORKING_MODE_SWOOLE_COR') && WORKING_MODE === WORKING_MODE_SWOOLE_COR &&
-             defined('LOCAL_IP'))
-            $srcip = LOCAL_IP;
-        else
+        if (\Swango\Environment::getWorkingMode()->isInSwooleWorker()) {
+            $srcip = \Swango\Environment::getLocalIp();
+        } else {
             $srcip = 0;
+        }
         return \cache::publish(self::REDIS_KEY,
             \Json::encode(
                 [

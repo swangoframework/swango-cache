@@ -5,15 +5,21 @@ namespace Swango\Cache;
  * @author fdrea
  */
 final class RedisPool {
-    private static $config, $queue;
+    private static $config, $queue, $timer_isset = false;
     public static function initInWorker() {
-        self::$config = include CONFIGSHAREDIR . 'redis.php';
+        self::$config = \Swango\Environment::getFrameworkConfig('redis');
         self::$queue = new \SplQueue();
-        \swoole_timer_after(rand(50, 5000), '\\swoole_timer_tick', 10000, '\\Swango\\Cache\\RedisPool::checkConnection');
     }
     private static function newConnection(): \Swoole\Coroutine\Redis {
         $connection = new \Swoole\Coroutine\Redis();
         $connection->connect(self::$config['host'], self::$config['port']);
+
+        if (! self::$timer_isset) {
+            self::$timer_isset = true;
+            \swoole_timer_after(rand(50, 5000), '\\swoole_timer_tick', 10000,
+                '\\Swango\\Cache\\RedisPool::checkConnection');
+        }
+
         return $connection;
     }
     public static function push(\Swoole\Coroutine\Redis $db): void {

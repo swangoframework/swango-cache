@@ -9,6 +9,7 @@
 	],
 	"require" : {
 		"php": ">=7.1",
+		"swango/environment": "^1.0",
 		"swango/stdlib": "^1.2",
 		"swlib/archer": "^1.1"
 	},
