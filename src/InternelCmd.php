@@ -9,7 +9,7 @@ class InternelCmd {
     private static $redis;
     protected static function sendBroadcast(string $class_name, string $cmd_data): int {
         if (\Swango\Environment::getWorkingMode()->isInSwooleWorker()) {
-            $srcip = \Swango\Environment::getLocalIp();
+            $srcip = \Swango\Environment::getServiceConfig()->local_ip;
         } else {
             $srcip = 0;
         }
