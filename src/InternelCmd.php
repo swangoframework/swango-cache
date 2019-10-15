@@ -73,7 +73,7 @@ class InternelCmd {
                     'data' => $cmd_data
                 ] = \Json::decodeAsArray($cmdpack);
 
-                if ((! defined('LOCAL_IP') || $srcip !== LOCAL_IP) && class_exists($class_name)) {
+                if ($srcip !== \Swango\Environment::getServiceConfig()->local_ip && class_exists($class_name)) {
                     \Swlib\Archer::task("$class_name::handle",
                         [
                             $cmd_data
