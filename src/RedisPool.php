@@ -30,7 +30,7 @@ final class RedisPool {
     public static function pop(): \Swoole\Coroutine\Redis {
         // 如果通道为空，则试图创建，若已达到最大连接数，则注册消费者，等待新的连接
         do {
-            if (self::$queue->isEmpty())
+            if (self::$queue === null || self::$queue->isEmpty())
                 return self::newConnection();
             $db = self::$queue->pop();
         } while ( ! $db->connected );
