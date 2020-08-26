@@ -34,7 +34,8 @@ class InternelCmd {
                 if (! isset($redis) || ! $redis->connected) {
                     // 因为 subscribe 和 publish 运行在同一个连接时会报错，这里获取到的连接不再push回连接池中
                     self::$redis = $redis = RedisPool::pop();
-                    $redis->select(1);
+                    $db = \Swango\Environment::getFrameworkConfig('redis')['cache_db'] ?? 1;
+                    $redis->select($db);
                     $redis->subscribe([
                         self::REDIS_KEY
                     ]);
