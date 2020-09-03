@@ -75,10 +75,14 @@ class InternelCmd {
                 ] = \Json::decodeAsArray($cmdpack);
 
                 if ($srcip !== \Swango\Environment::getServiceConfig()->local_ip && class_exists($class_name)) {
-                    \Swlib\Archer::task("$class_name::handle",
-                        [
-                            $cmd_data
-                        ]);
+                    go(
+                        function () use ($class_name, $cmd_data) {
+                            try {
+                                $class_name::handle($cmd_data);
+                            } catch(\Throwable $e) {
+                                \FileLog::logThrowable($e, \Swango\Environment::getDir()->log . 'error/', 'InternelCmd');
+                            }
+                        });
                     unset($cmd_data);
                     unset($class_name);
                 }
