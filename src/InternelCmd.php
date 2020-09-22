@@ -1,7 +1,7 @@
 <?php
 namespace Swango\Cache;
 class InternelCmd {
-    public const REDIS_KEY = 'InternelCmdPublisher';
+    public $CMD_REDIS_KEY = 'InternelCmdPublisher';
     /**
      *
      * @var \Swoole\Coroutine\Redis
@@ -13,13 +13,11 @@ class InternelCmd {
         } else {
             $srcip = 0;
         }
-        return \cache::publish(self::REDIS_KEY,
-            \Json::encode(
-                [
-                    'srcip' => $srcip,
-                    'class' => $class_name,
-                    'data' => $cmd_data
-                ]));
+        return \cache::publish(self::$CMD_REDIS_KEY, \Json::encode([
+            'srcip' => $srcip,
+            'class' => $class_name,
+            'data' => $cmd_data
+        ]));
     }
     final public function __construct() {
         go([
@@ -37,7 +35,7 @@ class InternelCmd {
                     $db = \Swango\Environment::getFrameworkConfig('redis')['cache_db'] ?? 1;
                     $redis->select($db);
                     $redis->subscribe([
-                        self::REDIS_KEY
+                        self::$CMD_REDIS_KEY
                     ]);
                 }
                 $arr = $redis->recv();
@@ -51,9 +49,10 @@ class InternelCmd {
                     $redis->close();
                     unset($redis);
                     continue;
-                } else
+                } else {
                     break;
-            } while ( true );
+                }
+            } while (true);
             [
                 $type,
                 $name,
@@ -73,16 +72,14 @@ class InternelCmd {
                     'class' => $class_name,
                     'data' => $cmd_data
                 ] = \Json::decodeAsArray($cmdpack);
-
                 if ($srcip !== \Swango\Environment::getServiceConfig()->local_ip && class_exists($class_name)) {
-                    go(
-                        function () use ($class_name, $cmd_data) {
-                            try {
-                                $class_name::handle($cmd_data);
-                            } catch(\Throwable $e) {
-                                \FileLog::logThrowable($e, \Swango\Environment::getDir()->log . 'error/', 'InternelCmd');
-                            }
-                        });
+                    go(function () use ($class_name, $cmd_data) {
+                        try {
+                            $class_name::handle($cmd_data);
+                        } catch (\Throwable $e) {
+                            \FileLog::logThrowable($e, \Swango\Environment::getDir()->log . 'error/', 'InternelCmd');
+                        }
+                    });
                     unset($cmd_data);
                     unset($class_name);
                 }
@@ -91,10 +88,11 @@ class InternelCmd {
             }
             unset($arr);
             unset($cmdpack);
-        } while ( true );
+        } while (true);
     }
     final public static function stopLoop() {
-        if (isset(self::$redis) && self::$redis->connected)
+        if (isset(self::$redis) && self::$redis->connected) {
             self::$redis->close();
+        }
     }
 }
