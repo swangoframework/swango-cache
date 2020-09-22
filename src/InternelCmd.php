@@ -1,7 +1,7 @@
 <?php
 namespace Swango\Cache;
 class InternelCmd {
-    public $CMD_REDIS_KEY = 'InternelCmdPublisher';
+    public static $CMD_REDIS_KEY = 'InternelCmdPublisher';
     /**
      *
      * @var \Swoole\Coroutine\Redis
