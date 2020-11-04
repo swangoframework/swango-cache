@@ -27,11 +27,13 @@ class InternelCmd {
     }
     final public function loop(): void {
         $redis = null;
+        $sleep_time = 0;
         do {
             do {
                 if (! isset($redis) || ! $redis->connected) {
                     // 因为 subscribe 和 publish 运行在同一个连接时会报错，这里获取到的连接不再push回连接池中
                     self::$redis = $redis = RedisPool::pop();
+                    $redis->setOptions(['timeout' => -1]);
                     $db = \Swango\Environment::getFrameworkConfig('redis')['cache_db'] ?? 1;
                     $redis->select($db);
                     $redis->subscribe([
@@ -39,17 +41,19 @@ class InternelCmd {
                     ]);
                 }
                 $arr = $redis->recv();
-                if ($arr === false) {
-                    self::$redis = null;
-                    unset($redis);
-                    return;
-                }
                 if (! is_array($arr) || count($arr) !== 3) {
                     self::$redis = null;
                     $redis->close();
                     unset($redis);
+                    if ($sleep_time > 0) {
+                        \co::sleep($sleep_time);
+                    }
+                    if (++$sleep_time > 10) {
+                        $sleep_time = 10;
+                    }
                     continue;
                 } else {
+                    $sleep_time = 0;
                     break;
                 }
             } while (true);

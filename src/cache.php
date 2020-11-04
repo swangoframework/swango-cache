@@ -116,7 +116,7 @@
  * @method static pipeline()
  * @method static watch()
  * @method static unwatch()
- * @method static publish()
+ * @method static int publish(string $key, string $message)
  * @method static subscribe(array $channel_keys)
  * @method static psubscribe()
  * @method static unsubscribe()
