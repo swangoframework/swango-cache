@@ -181,9 +181,8 @@ class cache {
         \SysContext::set('cache_dbindex', $index);
     }
     public static function __callStatic(string $name, array $arguments) {
-        $err_code = 0;
         $cache_dbindex = \SysContext::get('cache_dbindex') ?? 1;
-        for ($i = 0; $i < 10 && $err_code !== 104; ++$i) {
+        for ($i = 0; $i < 10; ++$i) {
             $redis = \Swango\Cache\RedisPool::pop();
             if (! isset($redis->_db_index) || $redis->_db_index !== $cache_dbindex) {
                 $redis->select($cache_dbindex);
@@ -191,10 +190,12 @@ class cache {
             }
             $ret = $redis->{$name}(...$arguments);
             $err_code = $redis->errCode;
+            if ($err_code !== 104) {
+                break;
+            }
         }
         if ($err_code !== 0) {
-            throw new \Swango\Cache\RedisErrorException("Redis error: [$redis->errCode] $redis->errMsg", $redis->errCode
-            );
+            throw new \Swango\Cache\RedisErrorException("Redis error: [$err_code] $redis->errMsg", $redis->errCode);
         }
         \Swango\Cache\RedisPool::push($redis);
         return $ret;
