@@ -4,9 +4,11 @@ final class RedisPool {
     private static array $config;
     private static \SplQueue $queue;
     private static int $timer;
-    public static function initInWorker() {
-        self::$config = \Swango\Environment::getFrameworkConfig('redis');
-        self::$queue = new \SplQueue();
+    public static function initInWorker(): void {
+        if (! isset(self::$queue)) {
+            self::$config = \Swango\Environment::getFrameworkConfig('redis');
+            self::$queue = new \SplQueue();
+        }
     }
     private static function newConnection(): \Swoole\Coroutine\Redis {
         $connection = new \Swoole\Coroutine\Redis();
@@ -21,13 +23,14 @@ final class RedisPool {
     public static function push(\Swoole\Coroutine\Redis $db): void {
         // 因为各种原因，push失败了，要抛弃该条连接，总连接数减1
         if ($db->connected) {
-            self::$queue->push($db);
+            isset(self::$queue) && self::$queue->push($db);
         }
     }
     public static function pop(): \Swoole\Coroutine\Redis {
         // 如果通道为空，则试图创建，若已达到最大连接数，则注册消费者，等待新的连接
+        self::initInWorker();
         do {
-            if (self::$queue === null || self::$queue->isEmpty()) {
+            if (self::$queue->isEmpty()) {
                 return self::newConnection();
             }
             $db = self::$queue->pop();
